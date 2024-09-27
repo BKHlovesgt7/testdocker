@@ -1,24 +1,10 @@
-FROM ubuntu:20.04
-
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    openjdk-8-jdk \
-    wget \
-    unzip
-
-# Download and install Android SDK
-RUN wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O android-sdk.zip && \
-    unzip android-sdk.zip -d /usr/local/android-sdk && \
-    rm android-sdk.zip
-
-# Set environment variables
-ENV ANDROID_HOME /usr/local/android-sdk
-ENV PATH $ANDROID_HOME/tools/bin:$PATH
-
-# Accept licenses
-RUN yes | sdkmanager --licenses
-
-# Install necessary SDK packages
-RUN sdkmanager "platform-tools" "platforms;android-29"
-
-CMD ["bash"]
+git clone https://github.com/anbox/anbox-modules.git
+cd anbox-modules
+sudo cp anbox.conf /etc/modules-load.d/
+sudo cp 99-anbox.rules /lib/udev/rules.d/
+sudo cp -rT ashmem /usr/src/anbox-ashmem-1
+sudo cp -rT binder /usr/src/anbox-binder-1
+sudo dkms install anbox-ashmem/1
+sudo dkms install anbox-binder/1
+sudo modprobe ashmem_linux
+sudo modprobe binder_linux
